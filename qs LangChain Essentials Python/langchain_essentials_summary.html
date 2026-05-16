@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LangChain Essentials - Python</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --surface: #1e293b;
+            --surface-hover: #334155;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --primary: #3b82f6;
+            --primary-glow: rgba(59, 130, 246, 0.5);
+            --accent: #10b981;
+            --code-bg: #0b1120;
+            --border: #334155;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.1) 0px, transparent 50%);
+            background-attachment: fixed;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+            padding: 40px 20px;
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin: 0 0 10px 0;
+            background: linear-gradient(to right, #60a5fa, #34d399);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-top: 50px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 10px;
+        }
+
+        h3 {
+            font-size: 1.3rem;
+            color: var(--primary);
+            margin-top: 30px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card {
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            background-color: var(--code-bg);
+            padding: 3px 6px;
+            border-radius: 6px;
+            font-size: 0.85em;
+            color: #93c5fd;
+            border: 1px solid rgba(147, 197, 253, 0.1);
+        }
+
+        ul {
+            padding-left: 20px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        li strong {
+            color: var(--text-main);
+        }
+
+        /* Table Styles */
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            background: rgba(30, 41, 59, 0.4);
+            margin-bottom: 40px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th, td {
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background-color: rgba(15, 23, 42, 0.6);
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.05em;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+
+        .tip {
+            background: rgba(16, 185, 129, 0.1);
+            border-left: 4px solid var(--accent);
+            padding: 20px;
+            border-radius: 0 12px 12px 0;
+            margin-top: 40px;
+        }
+
+        .tip strong {
+            color: var(--accent);
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>🧠 LangChain Essentials - Python</h1>
+        <p class="subtitle">A succinct reference guide summarizing the core concepts learned in the course, serving as a memory jog for future application building.</p>
+    </header>
+
+    <h2>Lecture Quick Reference</h2>
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Lesson / Video</th>
+                    <th>Notebook Reference</th>
+                    <th>Core Concept Learned</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>1. The Fast Agent</strong></td>
+                    <td><code>L1_FastAgent</code></td>
+                    <td>Building a basic ReAct loop agent that calls SQL tools and self-corrects errors.</td>
+                </tr>
+                <tr>
+                    <td><strong>2. Models & Messages</strong></td>
+                    <td><code>L2_Models_And_Messages</code></td>
+                    <td>Standard message roles (System, Human, AI, Tool) and the persistent scratchpad.</td>
+                </tr>
+                <tr>
+                    <td><strong>3. Streaming</strong></td>
+                    <td><code>L3_Streaming</code></td>
+                    <td>Emitting updates via <code>values</code> (step-by-step), <code>messages</code> (token-by-token), or custom streams.</td>
+                </tr>
+                <tr>
+                    <td><strong>4. Tools</strong></td>
+                    <td><code>L4_Tools</code></td>
+                    <td>Wrapping Python functions with <code>@tool</code> and using docstrings to guide LLM behavior.</td>
+                </tr>
+                <tr>
+                    <td><strong>5. Tools with MCP</strong></td>
+                    <td><code>L5_Tools_w_MCP</code></td>
+                    <td>Connecting to external, out-of-process tools using the Model Context Protocol.</td>
+                </tr>
+                <tr>
+                    <td><strong>6. Memory</strong></td>
+                    <td><code>L6_Memory</code></td>
+                    <td>Injecting context dependencies and preserving conversation history via checkpointing.</td>
+                </tr>
+                <tr>
+                    <td><strong>7. Structured Output</strong></td>
+                    <td><code>L7_StructuredOutput</code></td>
+                    <td>Forcing the LLM to output strict, validated JSON (Pydantic/TypedDict) instead of raw text.</td>
+                </tr>
+                <tr>
+                    <td><strong>8. Dynamic Prompting</strong></td>
+                    <td><code>L8_Dynamic_Prompt</code></td>
+                    <td>Using middleware to dynamically alter system prompts on the fly based on runtime context.</td>
+                </tr>
+                <tr>
+                    <td><strong>9. Human in the Loop</strong></td>
+                    <td><code>L9_HITL</code></td>
+                    <td>Pausing agent execution to require manual approval or edits before sensitive tool calls.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h2>Core Architecture: The ReAct Agent</h2>
+    <div class="card">
+        <p>The centerpiece of this course is the <strong>ReAct (Reasoning and Acting) Agent</strong>, built on top of LangGraph.</p>
+        <ul>
+            <li><strong>The Loop:</strong> The model <em>reasons</em> about a request, uses <em>tools</em> to take action, gets observations, and loops until it can provide a final answer.</li>
+            <li><strong>The Primitive:</strong> You can build this easily using <code>create_agent</code> from <code>langchain.agents</code>.</li>
+        </ul>
+    </div>
+
+    <h2>📓 Notebook Breakdown</h2>
+
+    <div class="card">
+        <h3>1. The Fast Agent (<code>L1_FastAgent</code>)</h3>
+        <ul>
+            <li><strong>Goal:</strong> Build an agent capable of exploring a SQLite database (<code>Chinook.db</code>) without prior schema knowledge.</li>
+            <li><strong>Key Concept:</strong> The agent runs in a loop. If a SQL tool returns an error, the agent reads the error, self-corrects, queries the table names, and tries again.</li>
+            <li><strong>UI:</strong> Taught how to visually trace and debug the agent's multi-step tool calls using the LangGraph Studio UI.</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <h3>2. Models and Messages (<code>L2_Models_And_Messages</code>)</h3>
+        <ul>
+            <li><strong>Messages as Circulation:</strong> Information flows through the agent via standard message types:
+                <ul>
+                    <li><code>SystemMessage</code>: Defines the core instructions and persona.</li>
+                    <li><code>HumanMessage</code>: The user's input/query.</li>
+                    <li><code>AIMessage</code>: Responses from the model, including tool call requests.</li>
+                    <li><code>ToolMessage</code>: The data returned from a tool execution.</li>
+                </ul>
+            </li>
+            <li><strong>Scratchpad:</strong> Messages aren't passed node-to-node; they append to a persistent scratchpad shared across the graph.</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <h3>3. Streaming (<code>L3_Streaming</code>)</h3>
+        <ul>
+            <li><strong>Problem:</strong> Agentic loops can take a long time to return a final answer.</li>
+            <li><strong>Solutions (Stream Modes):</strong>
+                <ul>
+                    <li><code>values</code>: Emits state updates after <em>every step</em>.</li>
+                    <li><code>messages</code>: Streams the LLM output <em>token-by-token</em>.</li>
+                    <li><code>custom</code>: Allows emitting custom progress streams from inside tools using <code>StreamWriter</code>.</li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <h3>4. Tools (<code>L4_Tools</code>)</h3>
+        <ul>
+            <li><strong>Action Generators:</strong> Standard Python functions wrapped in a <code>@tool</code> decorator.</li>
+            <li><strong>Discovery:</strong> The LLM decides when and how to use a tool based entirely on the function's name, type hints, and docstring.</li>
+            <li><strong>Optimization:</strong> Setting <code>parse_docstring=True</code> explicitly parses Google-style docstrings into strict metadata schemas for the LLM.</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <h3>5. Tools with MCP (<code>L5_Tools_w_MCP</code>)</h3>
+        <ul>
+            <li><strong>Model Context Protocol:</strong> An open standard that allows agents to use tools hosted <em>outside</em> of the Python process.</li>
+            <li><strong>Usage:</strong> Utilized <code>MultiServerMCPClient</code> to connect to a local <code>npx</code> server, loading external tools directly into the LangChain agent.</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <h3>6. Memory (<code>L6_Memory</code>)</h3>
+        <ul>
+            <li><strong>Context:</strong> <code>RuntimeContext</code> is used to inject static dependencies (like DB connections) into tools.</li>
+            <li><strong>Short-Term Memory:</strong> Fix amnesia by adding <code>MemorySaver()</code> (checkpointing) and passing a <code>thread_id</code> in the config to bind conversation state.</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <h3>7. Structured Output (<code>L7_StructuredOutput</code>)</h3>
+        <ul>
+            <li><strong>Goal:</strong> Forcing the LLM to reply with strict, predictable JSON data for computer systems to read.</li>
+            <li><strong>Usage:</strong> By providing a <code>response_format</code> (like a Pydantic Model or a TypedDict), the agent outputs validated, structured data instead of raw text.</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <h3>8. Dynamic Prompting & Middleware (<code>L8_Dynamic_Prompt</code>)</h3>
+        <ul>
+            <li><strong>Middleware:</strong> Allows inserting custom code to intercept agent steps.</li>
+            <li><strong>Dynamic Prompts:</strong> Use middleware functions to conditionally build and swap System Prompts on the fly based on runtime context (e.g. <code>is_employee</code> flag).</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <h3>9. Human in the Loop (HITL) (<code>L9_HITL</code>)</h3>
+        <ul>
+            <li><strong>Safety & Control:</strong> Adding interrupt breakpoints to the agent.</li>
+            <li><strong>Usage:</strong> Pausing the graph to require manual human approval, rejection, or edits before executing sensitive tool calls.</li>
+        </ul>
+    </div>
+
+    <div class="tip">
+        <strong>💡 Pro Tip:</strong> To review these concepts in code, open the corresponding Jupyter Notebook (<code>.ipynb</code> files) in your <code>python/</code> directory. Each notebook provides the direct, runnable implementation of the concepts summarized above!
+    </div>
+
+</div>
+
+</body>
+</html>
