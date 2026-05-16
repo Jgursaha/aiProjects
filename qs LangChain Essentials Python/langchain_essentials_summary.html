@@ -17,6 +17,7 @@
             --accent: #10b981;
             --code-bg: #0b1120;
             --border: #334155;
+            --purple-light: #c084fc;
         }
 
         body {
@@ -170,6 +171,54 @@
             color: var(--accent);
         }
 
+        /* Flow Diagrams & Images */
+        .flow-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .flow-node {
+            background: rgba(192, 132, 252, 0.15);
+            border: 1px solid var(--purple-light);
+            color: var(--text-main);
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .flow-arrow {
+            color: var(--text-muted);
+            font-weight: bold;
+        }
+
+        .flow-vertical {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            background: var(--code-bg);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px dashed var(--border);
+        }
+
+        .concept-image {
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .concept-image img {
+            max-width: 100%;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            background-color: #fff; /* Some slide assets might have transparent backgrounds that need white for readability */
+        }
     </style>
 </head>
 <body>
@@ -177,7 +226,7 @@
 <div class="container">
     <header>
         <h1>🧠 LangChain Essentials - Python</h1>
-        <p class="subtitle">A succinct reference guide summarizing the core concepts learned in the course, serving as a memory jog for future application building.</p>
+        <p class="subtitle">A comprehensive reference guide summarizing the core architectural concepts, ReAct flow, and Jupyter Notebook labs from the course.</p>
     </header>
 
     <h2>Lecture Quick Reference</h2>
@@ -242,48 +291,91 @@
 
     <h2>Core Architecture: The ReAct Agent</h2>
     <div class="card">
-        <p>The centerpiece of this course is the <strong>ReAct (Reasoning and Acting) Agent</strong>, built on top of LangGraph.</p>
+        <p>The centerpiece of this course is the <strong>ReAct (Reasoning and Acting) Agent</strong>, built on top of LangGraph. This architecture synergizes reasoning and acting in language models through a continuous execution loop.</p>
+        
+        <div class="flow-container">
+            <div class="flow-node" style="border-radius: 30px;">Request</div>
+            <div class="flow-arrow">↓</div>
+            <div class="flow-node">Model (Reason)</div>
+            <div class="flow-arrow">⤡ ⤢</div>
+            <div class="flow-node">Tools (Action & Observation)</div>
+            <div class="flow-arrow">↓</div>
+            <div class="flow-node" style="border-radius: 30px;">Result</div>
+        </div>
+
         <ul>
-            <li><strong>The Loop:</strong> The model <em>reasons</em> about a request, uses <em>tools</em> to take action, gets observations, and loops until it can provide a final answer.</li>
-            <li><strong>The Primitive:</strong> You can build this easily using <code>create_agent</code> from <code>langchain.agents</code>.</li>
+            <li><strong>Persistence:</strong> Built-in graph memory to remember across threads.</li>
+            <li><strong>Interrupts:</strong> Enables Human-in-the-Loop workflows by pausing execution.</li>
+            <li><strong>Tracing:</strong> Seamless integration with LangSmith for observability.</li>
         </ul>
     </div>
 
-    <h2>📓 Notebook Breakdown</h2>
+    <h2>System State & Message Flow</h2>
+    <div class="card">
+        <p>In LangGraph, the agent's memory is simply a continuously growing list of messages appended to a shared scratchpad. <code>State: "Messages" : [list of messages]</code></p>
+        <ul>
+            <li><code>SystemMessage</code>: "You are a helpful assistant"</li>
+            <li><code>HumanMessage</code>: "Check my calendar"</li>
+            <li><code>AIMessage</code>: (tool_call: calendar('schedule'))</li>
+            <li><code>ToolMessage</code>: "Busy today"</li>
+            <li><code>AIMessage</code>: "You are busy today"</li>
+        </ul>
+    </div>
+
+    <h2>The Middleware Lifecycle</h2>
+    <div class="card">
+        <p>Middleware allows you to insert specific code at key points in the ReAct loop to modify inputs, outputs, or behavior dynamically.</p>
+        <div class="flow-vertical">
+            <div><code>before_agent</code> : Setup (files, connections)</div>
+            <div class="flow-arrow">↓</div>
+            <div><code>before_model</code> : Summarization, guardrails</div>
+            <div class="flow-arrow">↓</div>
+            <div><code>wrap_model_call</code> / <code>wrap_tool_call</code> : Dynamic prompts, retries, caching</div>
+            <div class="flow-arrow">↓</div>
+            <div><code>after_model</code> : Output guardrails, Human-in-the-loop interrupts</div>
+            <div class="flow-arrow">↓</div>
+            <div><code>after_agent</code> : Teardown</div>
+        </div>
+    </div>
+
+    <h2>📓 Notebook Concept Breakdown</h2>
 
     <div class="card">
         <h3>1. The Fast Agent (<code>L1_FastAgent</code>)</h3>
+        <p><strong>Concept:</strong> A ReAct agent is built with <code>create_agent</code>. It acts as the orchestration engine connecting your user requests, a language model (for reasoning), and your database/tools (for acting and observing).</p>
+        <div class="concept-image">
+            <img src="lca-langchainV1-essentials/python/assets/LC_L1_Top.png" alt="ReAct Agent Flow">
+        </div>
         <ul>
             <li><strong>Goal:</strong> Build an agent capable of exploring a SQLite database (<code>Chinook.db</code>) without prior schema knowledge.</li>
-            <li><strong>Key Concept:</strong> The agent runs in a loop. If a SQL tool returns an error, the agent reads the error, self-corrects, queries the table names, and tries again.</li>
-            <li><strong>UI:</strong> Taught how to visually trace and debug the agent's multi-step tool calls using the LangGraph Studio UI.</li>
+            <li><strong>Key Takeaway:</strong> The agent runs in a loop. If a SQL tool returns an error, the agent reads the error observation, self-corrects, queries the table names, and tries again.</li>
         </ul>
     </div>
 
     <div class="card">
         <h3>2. Models and Messages (<code>L2_Models_And_Messages</code>)</h3>
+        <p><strong>Concept:</strong> Elements of the system communicate exclusively by appending message objects to a persistent <code>State</code> array.</p>
+        <div class="concept-image">
+            <img src="lca-langchainV1-essentials/python/assets/LC_Messages.png" alt="Message Flow State">
+        </div>
         <ul>
-            <li><strong>Messages as Circulation:</strong> Information flows through the agent via standard message types:
-                <ul>
-                    <li><code>SystemMessage</code>: Defines the core instructions and persona.</li>
-                    <li><code>HumanMessage</code>: The user's input/query.</li>
-                    <li><code>AIMessage</code>: Responses from the model, including tool call requests.</li>
-                    <li><code>ToolMessage</code>: The data returned from a tool execution.</li>
-                </ul>
-            </li>
+            <li><strong>Messages as Circulation:</strong> Information flows through standard message types: <code>SystemMessage</code>, <code>HumanMessage</code>, <code>AIMessage</code>, and <code>ToolMessage</code>.</li>
             <li><strong>Scratchpad:</strong> Messages aren't passed node-to-node; they append to a persistent scratchpad shared across the graph.</li>
         </ul>
     </div>
 
     <div class="card">
         <h3>3. Streaming (<code>L3_Streaming</code>)</h3>
+        <p><strong>Concept:</strong> Since agentic loops can be slow, streaming allows you to emit data token-by-token or step-by-step directly to the user to support highly interactive applications.</p>
+        <div class="concept-image">
+            <img src="lca-langchainV1-essentials/python/assets/LC_streaming.png" alt="Streaming Updates">
+        </div>
         <ul>
-            <li><strong>Problem:</strong> Agentic loops can take a long time to return a final answer.</li>
             <li><strong>Solutions (Stream Modes):</strong>
                 <ul>
                     <li><code>values</code>: Emits state updates after <em>every step</em>.</li>
                     <li><code>messages</code>: Streams the LLM output <em>token-by-token</em>.</li>
-                    <li><code>custom</code>: Allows emitting custom progress streams from inside tools using <code>StreamWriter</code>.</li>
+                    <li><code>custom</code>: Allows emitting user-defined data streams from inside tools.</li>
                 </ul>
             </li>
         </ul>
@@ -291,56 +383,71 @@
 
     <div class="card">
         <h3>4. Tools (<code>L4_Tools</code>)</h3>
+        <p><strong>Concept:</strong> Tools provide the "Action" part of ReAct. The Reasoning Node uses the tool's python description to decide when and how to call the tool, and the result acts as the "Observation".</p>
         <ul>
             <li><strong>Action Generators:</strong> Standard Python functions wrapped in a <code>@tool</code> decorator.</li>
-            <li><strong>Discovery:</strong> The LLM decides when and how to use a tool based entirely on the function's name, type hints, and docstring.</li>
             <li><strong>Optimization:</strong> Setting <code>parse_docstring=True</code> explicitly parses Google-style docstrings into strict metadata schemas for the LLM.</li>
         </ul>
     </div>
 
     <div class="card">
         <h3>5. Tools with MCP (<code>L5_Tools_w_MCP</code>)</h3>
+        <p><strong>Concept:</strong> You don't have to write all tools in Python. The Model Context Protocol allows the agent to reach out to an external server (e.g. running on Node.js) to execute tools.</p>
         <ul>
-            <li><strong>Model Context Protocol:</strong> An open standard that allows agents to use tools hosted <em>outside</em> of the Python process.</li>
+            <li><strong>Model Context Protocol:</strong> An open standard interface.</li>
             <li><strong>Usage:</strong> Utilized <code>MultiServerMCPClient</code> to connect to a local <code>npx</code> server, loading external tools directly into the LangChain agent.</li>
         </ul>
     </div>
 
     <div class="card">
         <h3>6. Memory (<code>L6_Memory</code>)</h3>
+        <p><strong>Concept:</strong> Without memory, the agent forgets previous messages (like "What did I buy?"). By utilizing a Checkpointer and a Thread ID, the agent gains long-term or session-based memory.</p>
+        <div class="concept-image">
+            <img src="lca-langchainV1-essentials/python/assets/LC_Memory_before.png" alt="Memory Architecture">
+        </div>
         <ul>
             <li><strong>Context:</strong> <code>RuntimeContext</code> is used to inject static dependencies (like DB connections) into tools.</li>
-            <li><strong>Short-Term Memory:</strong> Fix amnesia by adding <code>MemorySaver()</code> (checkpointing) and passing a <code>thread_id</code> in the config to bind conversation state.</li>
+            <li><strong>Short-Term Memory:</strong> Fix amnesia by adding <code>MemorySaver()</code> (checkpointing) and passing a <code>thread_id</code> in the config.</li>
         </ul>
     </div>
 
     <div class="card">
         <h3>7. Structured Output (<code>L7_StructuredOutput</code>)</h3>
+        <p><strong>Concept:</strong> Forcing the LLM to format its response as strict JSON so it can be parsed by subsequent computer systems (like extracting exact Name and Email strings).</p>
+        <div class="concept-image">
+            <img src="lca-langchainV1-essentials/python/assets/LC_StructuredOutput.png" alt="Structured Output Generation">
+        </div>
         <ul>
-            <li><strong>Goal:</strong> Forcing the LLM to reply with strict, predictable JSON data for computer systems to read.</li>
             <li><strong>Usage:</strong> By providing a <code>response_format</code> (like a Pydantic Model or a TypedDict), the agent outputs validated, structured data instead of raw text.</li>
         </ul>
     </div>
 
     <div class="card">
-        <h3>8. Dynamic Prompting & Middleware (<code>L8_Dynamic_Prompt</code>)</h3>
+        <h3>8. Dynamic Prompting (<code>L8_Dynamic_Prompt</code>)</h3>
+        <p><strong>Concept:</strong> Prompts must cover all phases and conditions of a task, but static prompts get too large. We can dynamically choose and inject the correct System Prompt at runtime using middleware.</p>
+        <div class="concept-image">
+            <img src="lca-langchainV1-essentials/python/assets/LC_DynamicPrompts.png" alt="Dynamic Prompt Selection">
+        </div>
         <ul>
-            <li><strong>Middleware:</strong> Allows inserting custom code to intercept agent steps.</li>
-            <li><strong>Dynamic Prompts:</strong> Use middleware functions to conditionally build and swap System Prompts on the fly based on runtime context (e.g. <code>is_employee</code> flag).</li>
+            <li><strong>Dynamic Prompts:</strong> Use middleware functions to conditionally build and swap System Prompts on the fly based on runtime context (e.g. table access limits).</li>
         </ul>
     </div>
 
     <div class="card">
         <h3>9. Human in the Loop (HITL) (<code>L9_HITL</code>)</h3>
+        <p><strong>Concept:</strong> Some tool actions are too dangerous to run automatically. We can inject an interrupt hook into the loop to pause execution until a human reviews the action.</p>
+        <div class="concept-image">
+            <img src="lca-langchainV1-essentials/python/assets/LC_HITL.png" alt="Human in the Loop Pause">
+        </div>
         <ul>
-            <li><strong>Safety & Control:</strong> Adding interrupt breakpoints to the agent.</li>
-            <li><strong>Usage:</strong> Pausing the graph to require manual human approval, rejection, or edits before executing sensitive tool calls.</li>
+            <li><strong>Safety & Control:</strong> Adding an interrupt breakpoint to the agent via <code>after_model</code>.</li>
+            <li><strong>Usage:</strong> Pausing the graph to require manual human approval, rejection, or edits before executing sensitive tool calls like <code>execute_sql</code>.</li>
         </ul>
     </div>
 
-    <div class="tip">
-        <strong>💡 Pro Tip:</strong> To review these concepts in code, open the corresponding Jupyter Notebook (<code>.ipynb</code> files) in your <code>python/</code> directory. Each notebook provides the direct, runnable implementation of the concepts summarized above!
-    </div>
+    <footer style="text-align: center; padding: 30px; margin-top: 40px; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.9rem;">
+        <p><strong>Acknowledgement:</strong> All conceptual diagrams and images used in this summary are sourced directly from the official LangChain training material as part of the <a href="https://academy.langchain.com/courses/take/langchain-essentials-python/lessons/69387052-overview" target="_blank" style="color: var(--primary); text-decoration: none;">LangChain Essentials - Python</a> course.</p>
+    </footer>
 
 </div>
 
