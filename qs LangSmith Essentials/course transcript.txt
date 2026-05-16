@@ -1,0 +1,440 @@
+=============================================
+File: Intro.txt
+=============================================
+
+[00:00:00] Welcome to this Quick start LangChain Academy course on LangSmith. My name's Sean and I'll be your instructor for this short walkthrough of the LangSmith platform. 
+
+Seán: I wanna start by introducing a concept I like to call the hidden part of agent engineering. A lot of development life cycles I see tend to look something like this.
+
+Phase one, build the application, phase three deploy. But what's missing is this crucial phase two. Testing refinement, continuous improvement. With LLM systems, this step is often overlooked because they're non-deterministic, which makes testing harder. It's the elephant in the room many of us try to ignore.
+
+So in this course, we're gonna focus on that missing phase. How to observe and evaluate your agent effectively. The issue is your system is a black box, input goes in, output goes out. How could we possibly begin to update and improve our application when we don't even know exactly what goes on within it?[00:01:00] 
+
+That's why our first step is to monitor in action with something called tracing. If this concept is new to you, then don't worry. We'll cover it in detail in the first chapter. Once we begin to monitor our system effectively, we can begin to debug effectively when issues arise. We can apply tests and experiment with different iterations of our application to optimize performance.
+
+Which you'll learn more about in chapter two. One aspect of our application we'll certainly want to experiment with is the system prompts, which inform our foundational models about how they should behave. The process of iteratively improving system prompts is known as prompt engineering, and isn't a new concept relative to Generative AI.
+
+How engineers go about testing different prompt iterations against each other has been improving in recent years with a more data led approach rather than the vibes based engineering of the early days. In chapter three, we'll explore some new tools in LangSmith that align more closely with these modern methods of prompt engineering.
+
+Once we've refined our application to the point where [00:02:00] it's ready for deployment, we wanna make sure we're choosing a platform that's suited to the unique challenges of deploying agents, challenges that traditionally software deployments don't face. We'll cover these challenges and how to overcome them while still deploying quickly in the final chapter.
+
+In this course, we'll be using an application called Chat LangChain. This is a real deployed chat bot where users can ask questions about LangChain or LangSmith. It will create a research plan, retrieve relevant documents as additional context, and then ideally craft a perfect answer for the user. This is a great example of the kind of application we wanna debug and monitor with LangSmith, as it's not just a chat bot.
+
+There's a lot of different moving pieces. If an issue arises in the output. It could have originated from their research plan, the document retrieval process, or even during the generation of the final response. So how would you debug and monitor this system with LangSmith? You may remember from earlier, [00:03:00] the first step is to familiarize yourself with a concept called tracing.
+
+Let's dive in.
+
+
+
+
+
+=============================================
+File: 1.1-Tracing.txt
+=============================================
+chapter 1 - tracing
+===
+
+[00:00:00] 
+
+Seán: Chapter one is going to be all about tracing. So first, what is tracing?
+
+Tracing is the mechanism that we use to observe the execution and flow of our application on Lang Smith. 
+
+To visualize what a trace represents, let's first use the simple example of a food delivery app.
+
+The entire process from start to finish, from ordering your food, to receiving it at the door can be thought of as the trace.
+
+If we wanted to break down this trace or larger process into smaller subprocesses or spans, we could do that too, we have a process payment, processing our order, cooking our food and finally delivering it
+
+in software and AI agent systems, we break down requests the exact same way.
+
+With a larger trace representing the entire request from initial input to final output and smaller spans representing the steps the AI agent takes within. Getting started with tracing literally couldn't be easier.
+
+For building with Lang Chain all we [00:01:00] need to do is add our environment variables to our project. Those are going to be things like our Lang Smith API key, our Lang Smith project name, so chat lang Chain, for example and our open AI or anthropic API key, right? Whatever our model's API key is that we're going to be using. 
+
+Lang Smith also support integrations with both open AI agents SDK, and Vercel AI SDK. 
+
+The instructions for both you can find in the Getting Started Guide.
+
+For the open AI agents we're going to configure our environment the same way
+
+and simply run the agent as normal,
+
+while setting your trace processor
+
+as the open AI agents tracing processor imported from the langsmith.wrappers library.
+
+For Vercel AI SDK,
+
+you're going to install these dependencies, configure your environment the same way.
+
+Simply run the agent as normal while importing Lang Smith as your wrapper.
+
+If our application is built using a different framework, then we still [00:02:00] configure our environment in the same way with the additional step of adding a traceable decorator to each of our functions that we want to trace.
+
+Now, these functions don't need to be LLM calls. They can be tool calls or even just a simple math operation. In fact, any function can be traced on Lang Smith using just a simple decorator, which I think is pretty neat.
+
+Once we've set up our tracing and have run our application,
+
+we can open up Lang Smith and choose our tracing project.
+
+We're then presented with a dashboard of all of our rooms updated in real time.
+
+If I click into one,
+
+I can see that each run is really an end-to-end execution of our application.
+
+On the left hand side, I've what we call a run tree. At the top, I can see the latency and a detailed breakdown of token usage.
+
+If I switch to this waterfall view, I can visualize how long each step took from start to [00:03:00] finish, which is really nice.
+
+If I expand my left hand side view, I get a lot more detail on each step and the actions that took place within it.
+
+Now, you'll notice for each step or action I choose on the right hand side, I can see the input, maybe the output, some metadata tool calls, you know, even documents retrieved.
+
+So tracing allows us to observe not just the final input and output of our application, but every single step taken within it.
+
+But what if I wanted to view an entire conversation rather than just the individual runs? 
+
+if I change my view to threads, I'm going to get just that.
+
+I can see here that each thread is just a collection of conversation or runs.
+
+Each run is represented as a turn, and I can either view a high level overview of latency and token information,
+
+Or I can get a more detailed breakdown of each trace,
+
+just [00:04:00] like before. So this was a brief intro to tracing, which again, is the mechanism that you're going to use to deep dive into your applications on Lang Smith. In the next chapter, we'll be exploring how you can evaluate your application using these traces, so you can verify it's performing the way that you wanted to.
+
+
+
+=============================================
+File: 2.1-Online-eval.txt
+=============================================
+chapter 2 - online eval
+===
+
+[00:00:00] Welcome back. In this video, we'll be discussing evaluation in Lang Smith.
+
+This is crucial for any production application to verify it's performing the way it wants to.
+
+There's a variety of ways that we can evaluate in Lang Smith, both online and offline.
+
+Online evaluation means applying a test, which we'll call an evaluator, to our live traces as they appear in our project. We have a lot of control over what we want this evaluator to be. It could be LLM as a judge, 
+
+Which is where we use another model to test the output of our model,
+
+custom code, a prebuilt evaluation found in Lang Smith like hallucination, conciseness, or code checker.
+
+We also combine some of these evaluations together for a composite score.
+
+So if I return to our tracing project in Lang Smith and open the evaluator tab, I can see all the ones we've already set [00:01:00] up.
+
+If I select helpfulness, an LLM as judge evaluator, we can take a look at the feedback configuration the evaluator prompt and some system settings, right? Like the model choice run filters and the sampling rate. 
+
+Run filters allow us to apply a evaluator to a subset of our responses.
+
+While the sampling rate
+
+determines what percentage of responses actually get evaluated. 
+
+Up here in evaluator traces,
+
+I'm given a list of all the runs that have been evaluated using this test.
+
+If we remember, LLM as a judge isn't the only type of evaluator that we can use. Let's take a look at a code evaluator.
+
+This one's a lot more simple, we're just presented with the code we'll be evaluating with. This block looks for any mention of Lang Smith, Lang Chain or Lang Graph in the user query.
+
+We can also apply evaluators to an entire [00:02:00] thread,
+
+not just the individual runs.
+
+There's a few examples here. Each one, LLM is judge. We've got user sentiment, task completion, and satisfaction.
+
+What's the best way to view these evaluation scores? Data for the sake of data is pretty much useless, right? We need a way to ingest, to process and present this to us, the engineer. that thought gives us a nice segway to our monitoring dashboards, which I want to show you next.
+
+Tracing projects on Lang Smith come with a pre-built dashboard,
+
+this presents useful information about usage, latency errors.
+
+If I want to view scores from my evaluators.
+
+Then I need to create a custom dashboard.
+
+I have one here that I haven't populated, so I can create a chart,
+
+and here I'm going to choose a metric. Now for this one,
+
+I'm looking for average feedback score, and then I choose the feedback key, which is any one of my evaluators that I've already [00:03:00] set up, right? So helpfulness could be the one that I set up. And then you can see here on the, on the right hand side. It'll give me a kind of a preview of what that graph's going to look like.
+
+What would it look like if I chose feedback count instead of average feedback score?
+
+That's just going to be a count of the amount of evaluations run at any one time, so that's not as useful.
+
+And feedback values is more useful for things like language or user sentiment,
+
+where the result of an evaluation is a string and not just a number.
+
+So I can create that and see it populate on my dashboard, can add as much charts as I'd like and really create a custom dashboard for my monitoring purposes. 
+
+One other thing I can do,
+
+if I go back to my tracing project, is actually create what's called an insights report. So this is brand new, which is pretty cool. What this does is use an agent to analyze your traces and detect usage patterns, [00:04:00] common agent behaviors, or failure modes.
+
+The flow I like to follow here when I'm creating a new insights report is to first start high level and explain what I'm trying to measure for
+
+so in this case, my agent answers user questions about LangChain.
+
+I would definitely like to know what Lang Chain topics are asked about the most, maybe give me some new ideas for videos that we need to create here at LangChain Academy.
+
+So now if you know any more information about how this specific project is structured, we can include that here.
+
+In our case, we can just copy what they say here, that the full chat history is in the output.messages field and that they should have all the relevant information. So now I want to generate config
+
+and now I can manually go into the configuration to review and tweak as I would like.
+
+I like the summary prompt, so I don't need to touch that.
+
+I've got categories here. I actually want the model [00:05:00] to create its own categories, so I'm going to leave that blank. But here in attributes, I can add a custom attribute to enrich my insights, things like sentiment satisfaction, other key properties can be captured here.
+
+So one thing I definitely want to measure for is user sentiment. If there's a lot of users not happy with the answer they're getting from Chat LangChain, then maybe that's a topic I definitely need to cover.
+
+Now that I'm happy with my configuration, I can click generate
+
+and I can see it's being generated here. This thing might take up to 30 minutes to complete, so like any good cooking show here is one I created earlier.
+
+And here's my result, right? The agent has gone through all of my traces
+
+and has organized them by category
+
+ordered by the percentage of runs that are asking about said categories. So you can obviously see here that land graph build patterns are the most popular
+
+and that checks out, our five hour land graph courses. One of our most popular on LangChain Academy.
+
+So dashboards and reports are great for [00:06:00] reactive monitoring of our application, but me and you being good responsible engineers, we want to be proactive too.
+
+We can set up alerts based on both our custom evals, like for example, let's say injection. So if that's perceived to be above, let's do 0.3 in the last 15 minutes, I want either a PagerDuty or maybe a web hook to let me know about it. 
+
+I can also use out of the box metrics like latency or errored runs.
+
+So that's it for online evaluation. In the next chapter, we'll be taking a look at offline evaluation and how that differs from what we just covered.
+
+
+
+=============================================
+File: 2.2-Offline-eval.txt
+=============================================
+chapter 3 - offline eval
+===
+
+Seán: [00:00:00] Welcome back. In the last video we covered online evaluation. In this video, we'll cover offline tests. When would we want to run an offline test? Well, let's say there's a new model we want to benchmark or a new prompt, i'd rather not evaluate live on my deployed app and run tests with real users, at least not right away. I might run an experiment, and the first thing any experiment needs is a good data set.
+
+In our case, a data set contains example inputs and reference golden outputs. This is exactly how we would want our app to respond in an ideal world.
+
+You can build a data set in a variety of different ways.
+
+We can manually create input-output pairs from scratch within LangSmith,
+
+we can import a dataset via CSV or JSON,
+
+or we can use past traces, real inputs and outputs. Depending on your team's [00:01:00] situation, this last method is likely the least involved and has the added benefit of including real user questions. So let's explore how to set that up in more detail.
+
+First, I'll create an automation. I want to collect a list of traces that have passed through an initial filter,
+
+let's say their helpfulness score, Is over eight.
+
+I could either add these input output pairs straight to the dataset,
+
+or I could add them to what's called an annotation queue.
+
+This is where members of your team can come and review the traces, choosing the best one for that data set.
+
+I definitely recommend setting up an annotation queue as this is a fantastic opportunity to get a human in the loop, maybe a subject matter expert from within your organization. Let's say a product manager, a legal specialist, or a business [00:02:00] analyst.
+
+So now that I'm happy with my data set, I can start to run experiments.
+
+I apply one of my evaluators from earlier to the dataset that I just built.
+
+Here's an experiment that we did earlier. You can see here that this experiment compared my application running on different models, so I can look into each one
+
+and see the input, the reference kind of ideal output and the output that it gave. Comparing the two of them, we have an accuracy score, an answer reliability score. Is it concise, right? The latency, the tokens, and the cost for each of my examples in my data set.
+
+And that's been done for different models too. Without these models being pushed to deployment, right in the safety of a sandbox environment.
+
+Let's say you wanted to compare two of those models side by side now, What I can see across these 10 examples is a comparative view between the two.
+
+But I can also open this chart view, select the charts I want to see, let's say maybe [00:03:00] accuracy, P 50 latency, total tokens.
+
+What's really interesting, which wasn't obvious from the first view, is the latency and the total tokens too.
+
+So this one experiment could inform quite a lot of the model choice that we are going to make going into deployment.
+
+Right now, this experiment is comparing models but I could just as easily be comparing applications running on different prompts or with different tools available to them. It doesn't necessarily have to be comparing foundation models, right? So I have a lot of choice
+
+over the kind of experiments I want to run and the data sets that I give it. So that's a high level overview of both online and offline evaluations in LangSmith. In the next chapter, we'll use the results of these tests to refine the perfect prompt for our application using the prompt playground.
+
+
+
+=============================================
+File: 3.1-Prompt-engineering.txt
+=============================================
+chapter 4 - prompt engineering
+===
+
+[00:00:00] 
+
+Seán: If you're watching this course, you're likely someone for whom prompt engineering needs no introduction.
+
+LangSmith provides a very intuitive way to test and engineer prompts for our application in what's called the playground. 
+
+So here in the playground, we can test out different system prompts.
+
+First we can test out this basic prompt for Chat LangChain. I can then input any question I want right here.
+
+So here, I'll just tee it up. A nice easy one. Click start.
+
+And it'll be generating its own output based on that system prompt.
+
+And here we can see the output that we get given, right? Nice and easy.
+
+What if I wanted to compare two different prompts, this version of the prompt, with maybe a more improved system prompt. I want to AB test my prompt engineering strategy. Well, to do that, I just click compare up here.
+
+And that gives me a second system prompt, kind of side by side for me to edit.
+
+And I've just added one more quick line, telling it to be very [00:01:00] clear, concise, informative.
+
+So rather than one by one inputing questions, one thing I could do is set up my own evaluation, just like beforehand, right? So if I click set up evaluation.
+
+You can see here I'm prompted to click a dataset,
+
+so I'm going to click my golden dataset from earlier.
+
+I have two evaluators set up that's going to be conciseness and correctness. These are the pre-built evaluators that they give us, but I can set up any evaluator I'd like here.
+
+And one last thing before I get started, you make sure the inputs
+
+are being pointed to correctly in my human messages, which in this case they're not. So I need to edit both of those so that they actually,
+
+I correctly give the questions to my system.
+
+So now if I just click start again,
+
+it is going to run through all 10 input-output pairs for both system prompts.
+
+I can let this run for a minute. For each question, it's going to measure the conciseness and the correctness.
+
+[00:02:00] And you can see here I'm given the mean for both conciseness and correctness for both my outputs. Pretty interesting results.
+
+On the one hand, our system prompt where we told it to be a little bit more concise is a teeny bit more concise, but it loses a teeny bit of correctness as well, right? So not the result I was expecting from this experiment.
+
+Maybe I just need to update my prompt a little bit more.
+
+Let's say I'm happy with prompt B. I can go up here and save my prompt to the prompt hub, which is where I can store all of my favorite prompts that I want to actually have in deployment. The prompt hub is over here. 
+
+This is another area where you can see a subject matter expert being looped in.
+
+I'm running these experiments themselves rather than going back and forth with an engineer. You can think of the prompts hub as kind of like a GitHub for the prompts that we are using in our application.
+
+Here I can fork prompts, I can edit them and commit the changes that I'm happy [00:03:00] with. You can then view a commit history to see what's changed over time and actually show the differences between previous prompts and the newer updates.
+
+Centralizing your prompts within this hub has one other advantage, and this one's pretty cool in my opinion. if you scroll down to the bottom, you see here, you can use this prompt as an object in a LangChain application. So if I change or update my prompt in this hub, that change is reflected automatically in the application itself.
+
+Think about that I can have one central resource for developing testing and updating prompts that all of my applications pull from.
+
+So now that I'm happy with my prompt and I've experimented to find the right version of my application, I can deploy with confidence. In the next chapter, we're going to explore how easy it is to deploy an AI agent using the LangSmith platform.
+
+
+
+=============================================
+File: 4.1-Deployment.txt
+=============================================
+chapter 5 - deployment
+===
+
+Seán: [00:00:00] and welcome back to our final chapter of today's course.
+
+I'd like to go full circle for a moment and remind us of this image we had at the start.
+
+If you've made it this far into the course, I think you can confidently say that you've mastered phase two in this deployment lifecycle. Now, what we're interested in is phase three In this video, you're going to learn how to deploy your agent in just a few minutes. But first, let's talk about the unique challenges an LLM application faces in deployment. First is latency. While other applications may measure requests in milliseconds, agent runtimes are typically in the order of seconds or even minutes.
+
+We can solve the real latency by parallelizing tasks or the perceived latency by streaming the response to the user.
+
+The second is persistence. Agents require memory across runs in order to maintain their work.
+
+So we need to be able to manage the state across [00:01:00] sessions, ideally without the need to create custom solutions for every single app.
+
+The third is to do with the type of requests that our application might receive.
+
+Some requests are quite long and it makes no sense to maintain that connection for the entire time. In that case, we want to be able to kick off and maintain agent runs in the background.
+
+We also want an API designed for long requests. For example, one that sends a heartbeat signal to prevent closure.
+
+We also expect our application to receive requests, especially during high traffic times. In this case, we want a deployment that scales horizontally and maintains a task queue.
+
+Next is specific to times when our application has the ability to take sensitive actions. In this case, we want support for human in the loop at any point of the application and a deployment that supports those endpoints.
+
+Finally, because our runtimes are so long,
+
+the chance of the user double [00:02:00] texting is relatively quite high.
+
+We want a deployment that has built in strategies to prevent flow disruption in these cases.
+
+Luckily, if your application
+
+is built with LangChain and LangGraph
+
+and hosted on LangSmith deployments,
+
+it will easily be able to manage any of these challenges.
+
+So how do we deploy on LangSmith?
+
+Click on deployments, and then new deployments.
+
+Authenticate your GitHub, then select the repo
+
+you would like to deploy in our case chat LangChain.
+
+Point it towards the correct branch or tag and our LangGraph config file.
+
+Now we can choose
+
+how many compute resources our deployment is going to need,
+
+depending on whether it is in development or is production ready.
+
+We can set our environment variables right here.
+
+Now here's a tip,
+
+rather than adding your variables one by one.
+
+Just copy and paste your entire .env file.
+
+We also support single repository or monorepo deployments for [00:03:00] JavaScript only. Now this is handy, every deployment automatically creates its own tracing project where you can apply everything you've learned in this course.
+
+Once I've deployed my application, I can make changes or revisions and view those revisions over time.
+
+In my overview tab,
+
+I can see my trace count with a list of the most recent traces
+
+as well as a breakdown of some more deployment specific metrics in the monitoring tab.
+
+One last thing I want to show you is LangSmith Studio. Here you can visualize, interact, and easily debug your application.
+
+And there we have it. Congratulations. We finished our exploration of LangSmith. In this course, you discovered what tracing is and how it could allow you to properly monitor your AI application,
+
+how to evaluate your agent live and in real time, as well as perform experiments in a sandbox environment,
+
+Where to play around, and perfect [00:04:00] different prompt iterations,
+
+and how to deploy your agent in a few clicks with the LangSmith platform. 
+
+So why not elevate your own application with your newfound understanding of agent development?
+
+And that's it for me. I really want to thank you for accompanying me on this journey, and I hope to see you again soon. Bye for now.
+
+
+
